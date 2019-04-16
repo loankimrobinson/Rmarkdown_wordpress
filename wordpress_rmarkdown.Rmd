@@ -1,0 +1,82 @@
+---
+title: "R Markdown with Wordpress"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+I would like to show you how to use R Markdown to create a post and post on Wordpress Blog without installing the Rwordpress packages
+
+Let's plot a line plot using ggplot2
+
+```{r essage = FALSE, warning=FALSE, tidy=TRUE,tidy.opts=list(width.cutoff=70)}
+library(ggplot2)
+Death_States_2016 <- read.csv("C:/Users/LOAN/Documents/Fire datasets/data/Death_States_2016.csv",header = TRUE,stringsAsFactors = FALSE)
+Death_States_2016$RR_plot <- ifelse(Death_States_2016$Relative_Risk < 1, -Death_States_2016$Relative_Risk, Death_States_2016$Relative_Risk )
+Death_States_2016$group <- ifelse(Death_States_2016$Relative_Risk >= 1, "Risky", "Non_Risky")
+Death_States_2016 <- Death_States_2016[order(-Death_States_2016$Relative_Risk),]
+Death_States_2016$State <- factor(Death_States_2016$State,levels = c(Death_States_2016$State))
+Death_States_2016$RR_label <- round(Death_States_2016$Relative_Risk,2)
+Death_States_2016$RR_vjust <- ifelse(Death_States_2016$Relative_Risk < 1, -1,2)
+Death_States_2016_plot <- Death_States_2016[!is.na(Death_States_2016$Relative_Risk),]
+p <- ggplot(data=Death_States_2016_plot, aes(x=State, y=RR_plot, fill = group)) +
+  geom_bar(stat="identity")+
+  geom_text(aes(label =RR_label ),vjust= Death_States_2016_plot$RR_vjust, color="white", size=3.5,position = position_dodge(width = 1))+
+  geom_hline(yintercept=0, linetype="dashed", color = "#993333", size=1) + 
+  scale_y_continuous(name="Relative Risk", breaks=c(-1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5, 3,3.5, 4), labels = c("0","0.5","1","1.5","2","2.5","3","3.5","4","4.5","5")) + 
+  theme_minimal() + labs(title = "Relative Risk of dying in a fire by State in 2016",
+                         subtitle = "Sources: National Center for Health Statistics and U.S. Census Bureau",
+                         caption = "**Delaware, Hawaii, North Dakota and Wyoming states where relative risk was not computed due to very small numbers of fire deaths (fewer than 10 deaths).") +
+  theme(axis.text.x = element_text(face=c("bold","italic"), color="steelblue",size=9, angle=90,hjust=1.2,vjust=0),
+        axis.text.y = element_text(face=c("bold")),
+        axis.ticks.length = unit(.3, "cm"),
+        axis.text = element_text( color="steelblue"),
+        plot.title = element_text(color="steelblue", size=16, face="bold.italic",hjust = 0.5),
+        plot.subtitle = element_text(color="steelblue",hjust = 0.5),
+        plot.caption = element_text(color="#993333",hjust = 0.5, face="italic"),
+        axis.title.x = element_text(color="steelblue", size=14, face="bold"),
+        axis.title.y = element_text(color="steelblue", size=14, face="bold"),
+        legend.position="none",
+        plot.margin = margin(t =0.5, r = 0.3, b = 0.5, l = 0.3, unit = "in"))
+
+
+
+```
+
+#### Save the plot and set size for the plot
+
+```{r}
+ggsave("C:/Users/LOAN/Documents/Fire datasets/data/Relative Risk.png", width = 40, height = 20, units = "cm", dpi = 200)
+
+```
+
+### Including Plots directly
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+p
+```
+
+### Insert plot by the link, we will use png and grid packages
+
+
+```{r fig.width=8, fig.height=6, essage = FALSE, warning=FALSE, tidy=TRUE,tidy.opts=list(width.cutoff=70)}
+library(png)
+library(grid)
+img <- readPNG("C:/Users/LOAN/Documents/Fire datasets/data/Relative Risk.png")
+grid.raster(img)
+
+```
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+
+
+
